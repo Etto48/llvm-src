@@ -46,7 +46,7 @@ impl Build {
 
     /// Set the output directory, this should be rust's "target" directory.
     /// The actual build directory will be `$OUT_DIR/llvm-build`.
-    pub fn out_dir(&mut self, out_dir: &PathBuf) -> &mut Self {
+    pub fn out_dir(&mut self, out_dir: &Path) -> &mut Self {
         self.out_dir = Some(out_dir.join("llvm-build"));
         self
     }
@@ -84,7 +84,6 @@ impl Build {
 
         let libs = std::fs::read_dir(out_dir.join("build/lib"))
             .unwrap()
-            .into_iter()
             .map(|f| f.unwrap())
             .filter(|f| f.file_type().unwrap().is_file())
             .map(|f| {
