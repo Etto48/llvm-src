@@ -20,11 +20,10 @@ pub struct Artifacts {
 }
 
 impl Build {
-
     /// Create a new `Build` instance.
     /// Parameters are fetched from the environment variables `HOST`, `TARGET`, `OUT_DIR`, and `PROFILE`.
     /// If one of these variables is not set, it must be manually set using the corresponding method:
-    /// 
+    ///
     /// - [Build::host]
     /// - [Build::target]
     /// - [Build::out_dir]
@@ -63,8 +62,7 @@ impl Build {
     /// This will panic if any of the required environment variables are not set (see [Build::new]).
     /// Returns an [Artifacts] struct, you will need to call [Artifacts::print_cargo_metadata]
     /// to print the cargo metadata and configure the build in the build script.
-    pub fn build(&self) -> Artifacts
-    {
+    pub fn build(&self) -> Artifacts {
         let host = self.host.as_ref().expect("HOST not set").as_str();
         let target = self.target.as_ref().expect("TARGET not set").as_str();
         let profile = self.profile.as_ref().expect("PROFILE not set").as_str();
@@ -76,7 +74,7 @@ impl Build {
         let source_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("llvm-15.0.7/llvm");
 
         let mut config = cmake::Config::new(source_dir);
-        
+
         config
             .host(host)
             .target(target)
@@ -84,13 +82,17 @@ impl Build {
             .profile(profile)
             .build();
 
-        let libs = std::fs::read_dir(out_dir.join("build/lib")).unwrap().into_iter().map(|f|f.unwrap()).filter(|f|
-            f.file_type().unwrap().is_file()
-        ).map(|f| {
-            let file_name = f.file_name().into_string().unwrap();
-            let last_dot = file_name.rfind('.').unwrap();
-            file_name[..last_dot].to_string()
-        }).collect::<Vec<_>>();
+        let libs = std::fs::read_dir(out_dir.join("build/lib"))
+            .unwrap()
+            .into_iter()
+            .map(|f| f.unwrap())
+            .filter(|f| f.file_type().unwrap().is_file())
+            .map(|f| {
+                let file_name = f.file_name().into_string().unwrap();
+                let last_dot = file_name.rfind('.').unwrap();
+                file_name[..last_dot].to_string()
+            })
+            .collect::<Vec<_>>();
 
         Artifacts {
             include_dir,
@@ -106,7 +108,7 @@ impl Default for Build {
         let target = env::var("TARGET").ok();
         let out_dir = env::var_os("OUT_DIR").map(|s| PathBuf::from(s).join("llvm-build"));
         let profile = env::var("PROFILE").ok();
-        
+
         Self {
             host,
             target,
@@ -131,7 +133,7 @@ impl Artifacts {
     pub fn libs(&self) -> &[String] {
         &self.libs
     }
-    
+
     /// Print the cargo metadata.
     pub fn print_cargo_metadata(&self) {
         println!("cargo:include={}", self.include_dir.display());
