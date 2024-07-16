@@ -82,7 +82,6 @@ impl Build {
             .target(target)
             .out_dir(out_dir)
             .profile(profile)
-            .generator("Ninja")
             .build();
 
         let libs = std::fs::read_dir(out_dir.join("build/lib")).unwrap().into_iter().map(|f|f.unwrap()).filter(|f|
@@ -118,6 +117,17 @@ impl Default for Build {
 }
 
 impl Artifacts {
+    pub fn include(&self) -> &Path {
+        &self.include_dir
+    }
+
+    pub fn lib(&self) -> &Path {
+        &self.lib_dir
+    }
+
+    pub fn libs(&self) -> &[String] {
+        &self.libs
+    }
     /// Print the cargo metadata.
     pub fn print_cargo_metadata(&self) {
         println!("cargo:include={}", self.include_dir.display());
