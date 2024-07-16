@@ -88,8 +88,12 @@ impl Build {
             .filter(|f| f.file_type().unwrap().is_file())
             .map(|f| {
                 let file_name = f.file_name().into_string().unwrap();
-                let last_dot = file_name.rfind('.').unwrap();
-                file_name[..last_dot].to_string()
+                if let Some(last_dot) = file_name.rfind('.')
+                {
+                    file_name[..last_dot].to_string()
+                } else {
+                    file_name
+                }
             })
             .collect::<Vec<_>>();
 
