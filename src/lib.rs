@@ -117,17 +117,21 @@ impl Default for Build {
 }
 
 impl Artifacts {
+    /// Get the include directory.
     pub fn include(&self) -> &Path {
         &self.include_dir
     }
 
+    /// Get the lib directory.
     pub fn lib(&self) -> &Path {
         &self.lib_dir
     }
 
+    /// Get the list of libraries.
     pub fn libs(&self) -> &[String] {
         &self.libs
     }
+    
     /// Print the cargo metadata.
     pub fn print_cargo_metadata(&self) {
         println!("cargo:include={}", self.include_dir.display());

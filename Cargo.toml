@@ -2,6 +2,9 @@
 name = "llvm-src"
 version = "0.1.0"
 edition = "2021"
+authors = ["Ettore Ricci <ettore.ricci.coding@gmail.com>"]
+license = "MIT"
+description = "A crate to download and build LLVM."
 
 [dependencies]
 cmake = "0.1.50"
