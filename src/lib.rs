@@ -80,6 +80,8 @@ impl Build {
             .target(target)
             .out_dir(out_dir)
             .profile(profile)
+            .generator("Ninja")
+            .define("LLVM_PARALLEL_LINK_JOBS", "1")
             .build();
 
         let libs = std::fs::read_dir(out_dir.join("build/lib"))
