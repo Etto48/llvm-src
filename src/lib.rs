@@ -89,7 +89,7 @@ impl Build {
         for lib in libs_iter {
             let lib = lib.expect("Failed to read lib entry").file_name();
             let lib = lib.to_str().expect("Failed to convert lib entry to string");
-            if let Some(lib_name) = lib.strip_prefix("lib")
+            if let Some(lib_name) = lib.strip_prefix("lib").and_then(|s| s.strip_suffix(".a"))
             {
                 libs.push(lib_name.to_string());
             } else if let Some(lib_name) = lib.strip_suffix(".lib")

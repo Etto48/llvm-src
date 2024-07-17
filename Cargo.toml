@@ -7,4 +7,4 @@ license = "MIT"
 description = "A crate to download and build LLVM."
 
 [dependencies]
-cmake = "0.1.50"
+cmake = "0.1"
