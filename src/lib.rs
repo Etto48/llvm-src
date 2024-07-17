@@ -1,5 +1,6 @@
 use std::env;
 use std::path::{Path, PathBuf};
+use std::process::Command;
 
 /// A builder for configuring the build of LLVM.
 /// You need to call [Build::build] to actually build the LLVM source code.
@@ -8,6 +9,7 @@ pub struct Build {
     target: Option<String>,
     out_dir: Option<PathBuf>,
     profile: Option<String>,
+    required_libs: Vec<String>,
 }
 
 /// The artifacts produced by the build.
@@ -58,6 +60,15 @@ impl Build {
         self
     }
 
+    /// Set the required libraries.
+    /// This is a list of libraries that will be linked to the final binary.
+    /// e.g. ["all-targets", "core", "mc"]
+    /// The default is ["all"].
+    pub fn required_libs(&mut self, required_libs: Vec<String>) -> &mut Self {
+        self.required_libs = required_libs;
+        self
+    }
+
     /// Build the LLVM source code.
     /// This will panic if any of the required environment variables are not set (see [Build::new]).
     /// Returns an [Artifacts] struct, you will need to call [Artifacts::print_cargo_metadata]
@@ -85,10 +96,18 @@ impl Build {
             .build();
 
         let mut libs = vec![];
-        let libs_iter = std::fs::read_dir(lib_dir.clone()).expect("Failed to read lib directory");
+
+
+        let llvm_config = out_dir.join("bin").join("llvm-config");
+        let libnames_output = Command::new(llvm_config)
+            .arg("--libnames")
+            .args(&self.required_libs)
+            .output()
+            .expect("Failed to run llvm-config");
+
+        let libs_iter = String::from_utf8(libnames_output.stdout).expect("Failed to convert llvm-config output to string");
+        let libs_iter = libs_iter.split(' ');
         for lib in libs_iter {
-            let lib = lib.expect("Failed to read lib entry").file_name();
-            let lib = lib.to_str().expect("Failed to convert lib entry to string");
             if let Some(lib_name) = lib.strip_prefix("lib").and_then(|s| s.strip_suffix(".a"))
             {
                 libs.push(lib_name.to_string());
@@ -96,7 +115,6 @@ impl Build {
             {
                 libs.push(lib_name.to_string());
             }
-
         }
 
         Artifacts {
@@ -113,12 +131,14 @@ impl Default for Build {
         let target = env::var("TARGET").ok();
         let out_dir = env::var_os("OUT_DIR").map(|s| PathBuf::from(s).join("llvm-build"));
         let profile = env::var("PROFILE").ok();
+        let required_libs = vec!["all".to_string()];
 
         Self {
             host,
             target,
             out_dir,
             profile,
+            required_libs,
         }
     }
 }
