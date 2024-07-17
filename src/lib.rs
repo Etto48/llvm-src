@@ -102,11 +102,12 @@ impl Build {
         let libnames_output = Command::new(llvm_config)
             .arg("--libnames")
             .args(&self.required_libs)
+            .arg("--system-libs")
             .output()
             .expect("Failed to run llvm-config");
 
         let libs_iter = String::from_utf8(libnames_output.stdout).expect("Failed to convert llvm-config output to string");
-        let libs_iter = libs_iter.split(' ');
+        let libs_iter = libs_iter.split(&[' ','\n']).filter(|s| !s.is_empty());
         for lib in libs_iter {
             if let Some(lib_name) = lib.strip_prefix("lib").and_then(|s| s.strip_suffix(".a"))
             {
@@ -114,6 +115,8 @@ impl Build {
             } else if let Some(lib_name) = lib.strip_suffix(".lib")
             {
                 libs.push(lib_name.to_string());
+            } else {
+                panic!("Unexpected library name: {}", lib);
             }
         }
 
