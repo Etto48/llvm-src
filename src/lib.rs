@@ -80,23 +80,24 @@ impl Build {
             .target(target)
             .out_dir(out_dir)
             .profile(profile)
+            .generator("Ninja")
             .define("LLVM_PARALLEL_LINK_JOBS", "1")
             .build();
 
-        let libs = std::fs::read_dir(out_dir.join("build/lib"))
-            .unwrap()
-            .map(|f| f.unwrap())
-            .filter(|f| f.file_type().unwrap().is_file())
-            .map(|f| {
-                let file_name = f.file_name().into_string().unwrap();
-                if let Some(last_dot) = file_name.rfind('.')
-                {
-                    file_name[..last_dot].to_string()
-                } else {
-                    file_name
-                }
-            })
-            .collect::<Vec<_>>();
+        let mut libs = vec![];
+        let libs_iter = std::fs::read_dir(lib_dir.clone()).expect("Failed to read lib directory");
+        for lib in libs_iter {
+            let lib = lib.expect("Failed to read lib entry").file_name();
+            let lib = lib.to_str().expect("Failed to convert lib entry to string");
+            if let Some(lib_name) = lib.strip_prefix("lib")
+            {
+                libs.push(lib_name.to_string());
+            } else if let Some(lib_name) = lib.strip_suffix(".lib")
+            {
+                libs.push(lib_name.to_string());
+            }
+
+        }
 
         Artifacts {
             include_dir,
@@ -140,10 +141,11 @@ impl Artifacts {
 
     /// Print the cargo metadata.
     pub fn print_cargo_metadata(&self) {
+        println!("cargo:rustc-link-search=native={}", self.lib_dir.display());
+        for lib in self.libs.iter() {
+            println!("cargo:rustc-link-lib=static={}", lib);
+        }
         println!("cargo:include={}", self.include_dir.display());
         println!("cargo:lib={}", self.lib_dir.display());
-        for lib in &self.libs {
-            println!("cargo:rustc-link-lib={}", lib);
-        }
     }
 }
