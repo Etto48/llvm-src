@@ -64,8 +64,11 @@ impl Build {
     /// This is a list of libraries that will be linked to the final binary.
     /// e.g. ["all-targets", "core", "mc"]
     /// The default is ["all"].
-    pub fn required_libs(&mut self, required_libs: Vec<String>) -> &mut Self {
-        self.required_libs = required_libs;
+    pub fn required_libs(&mut self, required_libs: Vec<impl ToString>) -> &mut Self {
+        self.required_libs = required_libs
+            .into_iter()
+            .map(|s| s.to_string())
+            .collect::<Vec<_>>();
         self
     }
 
