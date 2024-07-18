@@ -105,7 +105,7 @@ impl Build {
         let libnames_output = Command::new(llvm_config)
             .arg("--libnames")
             .args(&self.required_libs)
-            //.arg("--system-libs")
+            .arg("--system-libs")
             .arg("--link-static")
             .output()
             .expect("Failed to run llvm-config");
