@@ -106,6 +106,7 @@ impl Build {
             .arg("--libnames")
             .args(&self.required_libs)
             .arg("--system-libs")
+            .arg("--link-static")
             .output()
             .expect("Failed to run llvm-config");
 
