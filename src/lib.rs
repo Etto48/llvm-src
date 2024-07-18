@@ -85,7 +85,7 @@ impl Build {
         let lib_dir = out_dir.join("lib");
         let include_dir = out_dir.join("include");
 
-        let source_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("llvm-15.0.7/llvm");
+        let source_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("llvm-15.x/llvm");
 
         let mut config = cmake::Config::new(source_dir);
 
